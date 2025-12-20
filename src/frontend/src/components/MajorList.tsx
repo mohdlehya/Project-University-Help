@@ -3,12 +3,15 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getMajors } from '../services/api';
 import type { Major } from '../types';
 
+import { useBookmarks } from '../contexts/BookmarksContext';
+
 const MajorList = () => {
     const [majors, setMajors] = useState<Major[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const { uniKey, collegeKey } = useParams<{ uniKey: string; collegeKey: string }>();
     const navigate = useNavigate();
+    const { isBookmarked, toggleBookmark } = useBookmarks();
 
     useEffect(() => {
         const fetchMajors = async () => {
@@ -43,8 +46,21 @@ const MajorList = () => {
                 {majors.map((major) => (
                     <div
                         key={major._id}
-                        className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border-l-4 border-blue-500"
+                        className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border-l-4 border-blue-500 relative group"
                     >
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                toggleBookmark(major);
+                            }}
+                            className={`absolute top-4 left-4 text-2xl transition-transform hover:scale-110 focus:outline-none ${
+                                isBookmarked(major._id) ? 'opacity-100' : 'opacity-20 group-hover:opacity-100'
+                            }`}
+                            title={isBookmarked(major._id) ? "إزالة من المفضلة" : "إضافة للمفضلة"}
+                        >
+                            {isBookmarked(major._id) ? '⭐' : '☆'}
+                        </button>
+
                         <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">{major.name}</h2>
                         {major.description && (
                             <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-2">{major.description}</p>
