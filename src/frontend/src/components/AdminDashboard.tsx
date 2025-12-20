@@ -66,6 +66,7 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
     const [uniKey, setUniKey] = useState('');
     const [uniName, setUniName] = useState('');
     const [uniColor, setUniColor] = useState('#0a4b78');
+    const [uniType, setUniType] = useState<'public' | 'private'>('public');
 
     const handleAddUniversity = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -77,11 +78,12 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                 return;
             }
 
-            await axios.post(`${API_URL}/universities`, { key: uniKey, name: uniName, color: uniColor });
+            await axios.post(`${API_URL}/universities`, { key: uniKey, name: uniName, color: uniColor, type: uniType });
             setMessage('✅ تم إضافة الجامعة بنجاح!');
             setUniKey('');
             setUniName('');
             setUniColor('#0a4b78');
+            setUniType('public');
             fetchUniversities(); // Refresh list
         } catch (error: any) {
             setMessage(`❌ خطأ في إضافة الجامعة: ${error.response?.data?.message || 'خطأ غير معروف'}`);
@@ -119,6 +121,7 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
     const [minGpa, setMinGpa] = useState('');
     const [tuitionFees, setTuitionFees] = useState('');
     const [studyYears, setStudyYears] = useState('');
+    const [academicField, setAcademicField] = useState('engineering');
 
     // Fetch colleges when university is selected for majors
     useEffect(() => {
@@ -138,6 +141,7 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                 collegeKey: selectedCollegeKey,
                 description,
                 plan_url: planUrl,
+                academic_field: academicField,
                 admission_requirements: minGpa ? { min_gpa: parseFloat(minGpa) } : undefined,
                 study_info: {
                     duration_years: studyYears ? parseInt(studyYears) : undefined,
