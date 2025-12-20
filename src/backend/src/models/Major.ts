@@ -28,6 +28,7 @@ export interface IMajor extends Document {
     study_info?: IStudyInfo;
     admission_requirements?: IAdmissionRequirements;
     plan?: ICoursePlan[];
+    academic_field?: string;
 }
 
 const MajorSchema: Schema = new Schema({
@@ -36,6 +37,11 @@ const MajorSchema: Schema = new Schema({
     collegeKey: { type: String, required: true, ref: 'College' },
     description: { type: String },
     plan_url: { type: String },
+    academic_field: { 
+        type: String, 
+        enum: ['engineering', 'medical', 'it', 'business', 'arts', 'science'],
+        default: 'engineering'
+    },
     study_info: {
         duration_years: Number,
         degree_type: String,
