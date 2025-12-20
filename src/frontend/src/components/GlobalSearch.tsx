@@ -85,6 +85,43 @@ const GlobalSearch = () => {
                 ))}
             </div>
 
+            {/* Advanced Filters */}
+            <div className="max-w-4xl mx-auto mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        نوع الجامعة
+                    </label>
+                    <select
+                        value={universityType}
+                        onChange={(e) => setUniversityType(e.target.value)}
+                        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    >
+                        <option value="all">الكل</option>
+                        <option value="public">حكومية</option>
+                        <option value="private">خاصة</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        المجال الأكاديمي
+                    </label>
+                    <select
+                        value={academicField}
+                        onChange={(e) => setAcademicField(e.target.value)}
+                        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    >
+                        <option value="all">جميع المجالات</option>
+                        <option value="engineering">هندسة</option>
+                        <option value="medical">علوم طبية</option>
+                        <option value="it">تكنولوجيا المعلومات</option>
+                        <option value="business">أعمال واقتصاد</option>
+                        <option value="arts">آداب وعلوم إنسانية</option>
+                        <option value="science">علوم</option>
+                    </select>
+                </div>
+            </div>
+
             {/* Results Count */}
             {searchQuery && (
                 <div className="max-w-4xl mx-auto mb-4 text-center text-gray-600">
