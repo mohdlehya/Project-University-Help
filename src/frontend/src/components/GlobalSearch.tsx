@@ -14,6 +14,8 @@ interface SearchResults {
 const GlobalSearch = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchType, setSearchType] = useState('all');
+    const [universityType, setUniversityType] = useState('all'); // public, private, all
+    const [academicField, setAcademicField] = useState('all'); // engineering, medical, etc.
     const [results, setResults] = useState<SearchResults>({ universities: [], colleges: [], majors: [] });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
