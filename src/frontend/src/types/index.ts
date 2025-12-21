@@ -3,6 +3,7 @@ export interface University {
     key: string;
     name: string;
     color: string;
+    type?: 'public' | 'private';
 }
 
 export interface College {
@@ -36,4 +37,5 @@ export interface Major {
     plan_url?: string;
     study_info?: StudyInfo;
     admission_requirements?: AdmissionRequirements;
+    academic_field?: string;
 }
