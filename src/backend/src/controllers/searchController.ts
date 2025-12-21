@@ -26,23 +26,12 @@ export const globalSearch = async (req: Request, res: Response) => {
         }
 
         if (!type || type === 'all' || type === 'major') {
-            const majors = await Major.find({ name: searchRegex });
-            // Populate with university and college info
-            for (const major of majors) {
-                const university = await University.findOne({ key: major.universityKey });
-                const college = await College.findOne({
-                    key: major.collegeKey,
-                    universityKey: major.universityKey
-                });
-                results.majors.push({
-                    ...major.toObject(),
-                    university: university ? { name: university.name, color: university.color, key: university.key } : null,
-                    college: college ? { name: college.name, key: college.key } : null
-                });
-            }
+            majors = await Major.find({ name: searchRegex })
+                .populate('universityKey', 'name type')
+                .populate('collegeKey', 'name');
         }
 
-        res.json(results);
+        res.json({ universities, colleges, majors });
     } catch (error: any) {
         res.status(500).json({ message: error.message });
     }
