@@ -6,21 +6,30 @@ A comprehensive web application for exploring university majors in Gaza, featuri
 
 ### User Features
 - **📚 Browse Universities & Majors**: Explore universities, colleges, and academic programs
+- **🎨 Visual Experience**: Professional university cards with images and logos
 - **🔍 Advanced Search**: 
   - Search by university, college, or major name
   - Filter by university type (Public/Private)
   - Filter by academic field (Engineering, Medical, IT, Business, Arts, Science)
+- **💡 Consultation System**: 
+  - Submit consultation requests with GPA and preferences
+  - **🆕 Track Requests**: Track request status and view admin responses using a unique Request ID
 - **⭐ Bookmarks System**: Save favorite majors for quick access (stored in browser)
 - **🌓 Dark Mode**: Toggle between light and dark themes
 - **📱 Responsive Design**: Works seamlessly on desktop and mobile devices
 
 ### Admin Features
 - **🔐 Secure Admin Panel**: Protected login system
-- **➕ Add/Edit/Delete**: Manage universities, colleges, and majors
-- **📊 Admission Requirements**: Set min GPA, tuition fees, study duration
+- **➕ Full Content Management**: 
+  - Add/Edit/Delete Universities (with images & types)
+  - Manage Colleges and Majors
+  - **✏️ Advanced Editing**: Edit all fields including academic fields and study years
+- **📊 Consultation Management**: 
+  - View pending requests
+  - Respond to students
+  - **✏️ Edit Responses**: Modify responses even after sending
 - **🏛️ University Classification**: Mark universities as Public or Private
 - **🎯 Academic Field Tagging**: Categorize majors by academic field
-- **💾 Persistent Sessions**: Admin stays logged in across page refreshes
 
 ## 🛠️ Tech Stack
 
@@ -30,8 +39,7 @@ A comprehensive web application for exploring university majors in Gaza, featuri
 - **React Router** for navigation
 - **Axios** for API calls
 - **Tailwind CSS v4** for styling
-- **Context API** for state management (Theme, Bookmar
-ks)
+- **Context API** for state management
 
 ### Backend
 - **Node.js** with Express
@@ -44,7 +52,6 @@ ks)
 ### Prerequisites
 - Node.js 18+ 
 - MongoDB (local or Atlas)
-- Git
 
 ### Installation
 
@@ -93,194 +100,34 @@ npm run dev
 
 **Option 2: Using Docker** (Recommended for production)
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 Access the application:
-- **Frontend**: http://localhost:5173
+- **Frontend**: http://localhost:80 (or port 80 if via Docker), http://localhost:5173 (dev)
 - **Backend API**: http://localhost:5000/api
-- **Admin Panel**: http://localhost:5173/admin-panel
+- **Admin Panel**: http://localhost:5173/admin-panel or /admin-panel
 
 ## 📖 API Endpoints
 
 ### Universities
 - `GET /api/universities` - Get all universities
+- `GET /api/universities/:key` - Get single university
 - `POST /api/universities` - Create university (Admin)
 - `PUT /api/universities/:id` - Update university (Admin)
-- `DELETE /api/universities/:id` - Delete university (Admin)
 
-### Colleges
-- `GET /api/universities/:uniKey/colleges` - Get colleges by university
-- `POST /api/colleges` - Create college (Admin)
-- `PUT /api/colleges/:id` - Update college (Admin)
-- `DELETE /api/colleges/:id` - Delete college (Admin)
-
-### Majors
-- `GET /api/universities/:uniKey/colleges/:collegeKey/majors` - Get majors
-- `POST /api/majors` - Create major (Admin)
-- `PUT /api/majors/:id` - Update major (Admin)
-- `DELETE /api/majors/:id` - Delete major (Admin)
-
-### Search
-- `GET /api/search?query=<term>&type=<all|university|college|major>` - Global search
-
-### Admin
-- `POST /api/admin/login` - Admin login
-
-## 🗂️ Data Models
-
-### University
-```typescript
-{
-  key: string;           // Unique identifier (e.g., "iu")
-  name: string;          // University name
-  color: string;         // Brand color (hex)
-  type: 'public' | 'private';  // University type
-}
-```
-
-### College
-```typescript
-{
-  key: string;           // Unique identifier
-  name: string;          // College name
-  universityKey: string; // Reference to university
-}
-```
-
-### Major
-```typescript
-{
-  name: string;
-  universityKey: string;
-  collegeKey: string;
-  description?: string;
-  plan_url?: string;
-  academic_field?: string;  // engineering, medical, it, business, arts, science
-  study_info?: {
-    duration_years?: number;
-    tuition_fees?: number;
-  };
-  admission_requirements?: {
-    min_gpa?: number;  // 0-100 scale
-  };
-}
-```
-
-## 🔒 Admin Panel
-
-**Default Credentials** (Change in production!):
-- Username: `admin`
-- Password: `admin123`
-
-### Admin Features
-1. **Universities**: Add, edit, delete universities with type classification
-2. **Colleges**: Manage colleges under each university
-3. **Majors**: Full CRUD operations with:
-   - Admission requirements (Min GPA %)
-   - Study info (Duration, Fees per credit hour)
-   - Academic field categorization
-   - Study plan URL
-
-## 🐳 Docker Deployment
-
-The project includes Docker configuration for easy deployment:
-
-```bash
-# Build and start services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-```
-
-Services:
-- **frontend**: React app (port 5173)
-- **backend**: Express API (port 5000)
-- **mongodb**: MongoDB database (port 27017)
-
-## 📁 Project Structure
-
-```
-Project University Help/
-├── src/
-│   ├── backend/          # Express API
-│   │   ├── src/
-│   │   │   ├── models/   # Mongoose models
-│   │   │   ├── routes/   # API routes
-│   │   │   └── controllers/
-│   │   └── package.json
-│   └── frontend/         # React app
-│       ├── src/
-│       │   ├── components/
-│       │   ├── contexts/
-│       │   ├── services/
-│       │   └── types/
-│       └── package.json
-├── docker-compose.yml
-├── Dockerfile
-└── README.md
-```
-
-## 🎨 Features in Detail
-
-### Bookmarks System
-- Bookmark favorite majors with a single click
-- Persist bookmarks in browser localStorage
-- View all bookmarked majors in dedicated page
-- Real-time bookmark counter in navbar
-
-### Advanced Search
-- Debounced search (300ms delay)
-- Filter by entity type (universities/colleges/majors)
-- Filter by university type (public/private)
-- Filter by academic field
-- Highlighted search results
-
-### Dark Mode
-- System-wide theme toggle
-- Persists user preference
-- Smooth transitions between themes
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 Commit Convention
-
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
-- `feat:` New features
-- `fix:` Bug fixes
-- `docs:` Documentation changes
-- `style:` Code style changes
-- `refactor:` Code refactoring
-- `test:` Test additions/changes
-- `chore:` Build/config changes
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 👨‍💻 Author
-
-Developed with ❤️ for Gaza Universities
-
-## 🐛 Known Issues
-
-None at the moment! Report issues on GitHub.
+### Consultation
+- `POST /api/consultations` - Submit request
+- `GET /api/consultations/:requestId` - Track request (Public)
+- `GET /api/admin/consultations` - Get all requests (Admin)
+- `PUT /api/admin/consultations/:id` - Respond/Update (Admin)
 
 ## 🔜 Roadmap
 
-- [ ] User authentication system
-- [ ] University comparisons
-- [ ] Career path suggestions
+- [x] User authentication system (Admin only)
+- [x] Student Consultation Tracking (Request ID)
+- [x] University Images & Branding
+- [ ] University comparisons feature
 - [ ] Student reviews and ratings
 - [ ] Mobile app (React Native)
 

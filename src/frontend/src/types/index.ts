@@ -4,6 +4,7 @@ export interface University {
     name: string;
     color: string;
     type?: 'public' | 'private';
+    imageUrl?: string;
 }
 
 export interface College {

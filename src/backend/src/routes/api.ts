@@ -4,6 +4,7 @@ import { getColleges, createCollege, updateCollege, deleteCollege } from '../con
 import { getMajors, createMajor, getMajorDetails, updateMajor, deleteMajor } from '../controllers/majorController';
 import { globalSearch } from '../controllers/searchController';
 import { adminLogin, createAdmin, getAllAdmins } from '../controllers/adminController';
+import { createRequest, getAllRequests, updateRequest, deleteRequest, getRequestStatus } from '../controllers/consultationController';
 
 const router = express.Router();
 
@@ -33,5 +34,12 @@ router.post('/majors', createMajor);
 router.get('/universities/:uniKey/colleges/:collegeKey/majors/:majorId', getMajorDetails);
 router.put('/majors/:id', updateMajor);
 router.delete('/majors/:id', deleteMajor);
+
+// Consultation Requests
+router.post('/consultations', createRequest);
+router.get('/consultations/:requestId', getRequestStatus);  // Public tracking
+router.get('/admin/consultations', getAllRequests);
+router.put('/admin/consultations/:id', updateRequest);
+router.delete('/admin/consultations/:id', deleteRequest);
 
 export default router;

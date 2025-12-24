@@ -33,7 +33,7 @@ const CollegeList = () => {
     return (
         <div className="container mx-auto p-4">
             <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/universities')}
                 className="mb-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg"
             >
                 ⬅ رجوع للجامعات

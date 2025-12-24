@@ -44,17 +44,10 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
     const [colleges, setColleges] = useState<College[]>([]);
     const [majors, setMajors] = useState<Major[]>([]);
     
-    // Consultation Requests State
-    const [requests, setRequests] = useState<ConsultationRequest[]>([]);
-    const [selectedRequest, setSelectedRequest] = useState<ConsultationRequest | null>(null);
-    const [responseText, setResponseText] = useState('');
-    const [showResponseModal, setShowResponseModal] = useState(false);
+
 
     useEffect(() => {
         fetchUniversities();
-        if (activeTab === 'requests') {
-            fetchRequests();
-        }
     }, [activeTab]);
 
     const fetchMajors = async (uniKey: string, collegeKey: string) => {
@@ -89,7 +82,6 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
     const [uniName, setUniName] = useState('');
     const [uniColor, setUniColor] = useState('#0a4b78');
     const [uniType, setUniType] = useState<'public' | 'private'>('public');
-    const [uniImageUrl, setUniImageUrl] = useState('');
 
     const handleAddUniversity = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -101,13 +93,12 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                 return;
             }
 
-            await axios.post(`${API_URL}/universities`, { key: uniKey, name: uniName, color: uniColor, type: uniType, imageUrl: uniImageUrl || undefined });
+            await axios.post(`${API_URL}/universities`, { key: uniKey, name: uniName, color: uniColor, type: uniType });
             setMessage('✅ تم إضافة الجامعة بنجاح!');
             setUniKey('');
             setUniName('');
             setUniColor('#0a4b78');
             setUniType('public');
-            setUniImageUrl('');
             fetchUniversities(); // Refresh list
         } catch (error: any) {
             setMessage(`❌ خطأ في إضافة الجامعة: ${error.response?.data?.message || 'خطأ غير معروف'}`);
@@ -130,10 +121,6 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
             setMessage('✅ تم إضافة الكلية بنجاح!');
             setCollegeKey('');
             setCollegeName('');
-            // Refresh the colleges list if a university is selected
-            if (selectedUniKey) {
-                fetchColleges(selectedUniKey);
-            }
         } catch (error: any) {
             setMessage(`❌ خطأ في إضافة الكلية: ${error.response?.data?.message || 'خطأ غير معروف'}`);
         }
@@ -149,7 +136,6 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
     const [minGpa, setMinGpa] = useState('');
     const [tuitionFees, setTuitionFees] = useState('');
     const [studyYears, setStudyYears] = useState('');
-    const [degreeType, setDegreeType] = useState('');
     const [academicField, setAcademicField] = useState('engineering');
 
     // Fetch colleges when university is selected for majors
@@ -174,8 +160,7 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                 admission_requirements: minGpa ? { min_gpa: parseFloat(minGpa) } : undefined,
                 study_info: {
                     duration_years: studyYears ? parseInt(studyYears) : undefined,
-                    tuition_fees: tuitionFees || undefined,
-                    degree_type: degreeType || undefined
+                    tuition_fees: tuitionFees || undefined
                 }
             });
             setMessage('✅ تم إضافة التخصص بنجاح!');
@@ -187,7 +172,6 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
             setMinGpa('');
             setTuitionFees('');
             setStudyYears('');
-            setDegreeType('');
             
             // Refresh list
             if (selectedMajorUniKey && selectedCollegeKey) {
@@ -267,286 +251,61 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
     const labelClass = "block text-gray-700 dark:text-gray-200 font-semibold mb-2";
     const cardClass = "bg-white dark:bg-gray-800 p-6 rounded-lg shadow";
 
-    // Consultation Request Handlers
-    const fetchRequests = async () => {
-        try {
-            const response = await axios.get(`${API_URL}/admin/consultations`);
-            setRequests(response.data);
-        } catch (error) {
-            console.error('Error fetching requests:', error);
-        }
-    };
-
-    const handleRespondToRequest = async () => {
-        if (!selectedRequest || !responseText.trim()) return;
-
-        try {
-            await axios.put(`${API_URL}/admin/consultations/${selectedRequest._id}`, {
-                status: 'completed',
-                adminResponse: responseText
-            });
-            setShowResponseModal(false);
-            setResponseText('');
-            setSelectedRequest(null);
-            fetchRequests();
-        } catch (error) {
-            console.error('Error responding to request:', error);
-        }
-    };
-
-    const handleDeleteRequest = async (id: string) => {
-        if (!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
-
-        try {
-            await axios.delete(`${API_URL}/admin/consultations/${id}`);
-            fetchRequests();
-        } catch (error) {
-            console.error('Error deleting request:', error);
-        }
-    };
-
-    const pendingRequests = requests.filter(r => r.status === 'pending');
-
     return (
-        <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-            {/* Professional Sidebar */}
-            <aside className="w-64 bg-gray-900 dark:bg-gray-950 text-white flex-shrink-0 min-h-screen">
-                <div className="p-6">
-                    <div className="flex items-center gap-3 mb-8">
-                        <span className="text-3xl">🛡️</span>
-                        <h2 className="text-xl font-bold">لوحة التحكم</h2>
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-8 text-gray-900 dark:text-gray-100">
+            <div className="max-w-4xl mx-auto">
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">لوحة التحكم</h1>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => navigate('/')}
+                            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg"
+                        >
+                            العودة للرئيسية
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+                        >
+                            تسجيل الخروج
+                        </button>
                     </div>
-
-                    <nav className="space-y-2">
-                        <button
-                            onClick={() => setActiveTab('overview')}
-                            className={`w-full text-right px-4 py-3 rounded-lg transition flex items-center gap-3 ${
-                                activeTab === 'overview' 
-                                    ? 'bg-indigo-600 text-white' 
-                                    : 'hover:bg-gray-800 text-gray-300'
-                            }`}
-                        >
-                            <span className="text-xl">📊</span>
-                            <span className="font-semibold">نظرة عامة</span>
-                        </button>
-
-                        <button
-                            onClick={() => setActiveTab('universities')}
-                            className={`w-full text-right px-4 py-3 rounded-lg transition flex items-center gap-3 ${
-                                activeTab === 'universities' 
-                                    ? 'bg-indigo-600 text-white' 
-                                    : 'hover:bg-gray-800 text-gray-300'
-                            }`}
-                        >
-                            <span className="text-xl">🏛️</span>
-                            <span className="font-semibold">الجامعات ({universities.length})</span>
-                        </button>
-
-                        <button
-                            onClick={() => setActiveTab('colleges')}
-                            className={`w-full text-right px-4 py-3 rounded-lg transition flex items-center gap-3 ${
-                                activeTab === 'colleges' 
-                                    ? 'bg-indigo-600 text-white' 
-                                    : 'hover:bg-gray-800 text-gray-300'
-                            }`}
-                        >
-                            <span className="text-xl">🏫</span>
-                            <span className="font-semibold">الكليات</span>
-                        </button>
-
-                        <button
-                            onClick={() => setActiveTab('majors')}
-                            className={`w-full text-right px-4 py-3 rounded-lg transition flex items-center gap-3 ${
-                                activeTab === 'majors' 
-                                    ? 'bg-indigo-600 text-white' 
-                                    : 'hover:bg-gray-800 text-gray-300'
-                            }`}
-                        >
-                            <span className="text-xl">📚</span>
-                            <span className="font-semibold">التخصصات</span>
-                        </button>
-
-                        <button
-                            onClick={() => { setActiveTab('requests'); fetchRequests(); }}
-                            className={`w-full text-right px-4 py-3 rounded-lg transition flex items-center gap-3 relative ${
-                                activeTab === 'requests' 
-                                    ? 'bg-indigo-600 text-white' 
-                                    : 'hover:bg-gray-800 text-gray-300'
-                            }`}
-                        >
-                            <span className="text-xl">📝</span>
-                            <span className="font-semibold">طلبات الاستشارة</span>
-                            {pendingRequests.length > 0 && (
-                                <span className="absolute left-3 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                                    {pendingRequests.length}
-                                </span>
-                            )}
-                        </button>
-
-                        <div className="pt-4 mt-4 border-t border-gray-700">
-                            <button
-                                onClick={() => navigate('/')}
-                                className="w-full text-right px-4 py-3 rounded-lg transition flex items-center gap-3 hover:bg-gray-800 text-gray-300"
-                            >
-                                <span className="text-xl">🏠</span>
-                                <span className="font-semibold">الصفحة الرئيسية</span>
-                            </button>
-                            <button
-                                onClick={handleLogout}
-                                className="w-full text-right px-4 py-3 rounded-lg transition flex items-center gap-3 hover:bg-red-900 text-gray-300 hover:text-white"
-                            >
-                                <span className="text-xl">🚪</span>
-                                <span className="font-semibold">تسجيل الخروج</span>
-                            </button>
-                        </div>
-                    </nav>
                 </div>
-            </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 p-8">
+                {/* Tabs */}
+                <div className="flex gap-2 mb-6">
+                    <button
+                        onClick={() => setActiveTab('universities')}
+                        className={`px-6 py-3 rounded-lg font-semibold ${activeTab === 'universities'
+                            ? 'bg-indigo-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                            }`}
+                    >
+                        الجامعات ({universities.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('colleges')}
+                        className={`px-6 py-3 rounded-lg font-semibold ${activeTab === 'colleges'
+                            ? 'bg-green-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                            }`}
+                    >
+                        الكليات
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('majors')}
+                        className={`px-6 py-3 rounded-lg font-semibold ${activeTab === 'majors'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                            }`}
+                    >
+                        التخصصات
+                    </button>
+                </div>
+
                 {message && (
                     <div className="mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow text-center font-semibold">
                         {message}
-                    </div>
-                )}
-
-                {/* Overview Tab */}
-                {activeTab === 'overview' && (
-                    <div>
-                        <h1 className="text-3xl font-bold mb-8">نظرة عامة</h1>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-gray-600 dark:text-gray-400 text-sm">الجامعات</p>
-                                        <h3 className="text-3xl font-bold mt-2">{universities.length}</h3>
-                                    </div>
-                                    <div className="bg-indigo-100 dark:bg-indigo-900/30 p-4 rounded-full">
-                                        <span className="text-4xl">🏛️</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-gray-600 dark:text-gray-400 text-sm">طلبات الاستشارة</p>
-                                        <h3 className="text-3xl font-bold text-orange-600 mt-2">{requests.length}</h3>
-                                    </div>
-                                    <div className="bg-orange-100 dark:bg-orange-900/30 p-4 rounded-full">
-                                        <span className="text-4xl">📝</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-gray-600 dark:text-gray-400 text-sm">طلبات معلقة</p>
-                                        <h3 className="text-3xl font-bold text-red-600 mt-2">{pendingRequests.length}</h3>
-                                    </div>
-                                    <div className="bg-red-100 dark:bg-red-900/30 p-4 rounded-full">
-                                        <span className="text-4xl">⏳</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                            <h2 className="text-xl font-bold mb-4">إجراءات سريعة</h2>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <button onClick={() => setActiveTab('universities')} className="p-4 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg transition text-center">
-                                    <div className="text-3xl mb-2">🏛️</div>
-                                    <div className="font-semibold">إضافة جامعة</div>
-                                </button>
-                                <button onClick={() => setActiveTab('colleges')} className="p-4 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition text-center">
-                                    <div className="text-3xl mb-2">🏫</div>
-                                    <div className="font-semibold">إضافة كلية</div>
-                                </button>
-                                <button onClick={() => setActiveTab('majors')} className="p-4 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition text-center">
-                                    <div className="text-3xl mb-2">📚</div>
-                                    <div className="font-semibold">إضافة تخصص</div>
-                                </button>
-                                <button onClick={() => { setActiveTab('requests'); fetchRequests(); }} className="p-4 bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded-lg transition text-center relative">
-                                    <div className="text-3xl mb-2">📝</div>
-                                    <div className="font-semibold">الطلبات</div>
-                                    {pendingRequests.length > 0 && (
-                                        <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{pendingRequests.length}</span>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Requests Tab */}
-                {activeTab === 'requests' && (
-                    <div>
-                        <h1 className="text-3xl font-bold mb-8">طلبات الاستشارة</h1>
-                        {requests.length === 0 ? (
-                            <div className="bg-white dark:bg-gray-800 p-12 rounded-xl shadow-lg text-center">
-                                <span className="text-6xl mb-4 block">📭</span>
-                                <p className="text-gray-600 dark:text-gray-400 text-lg">لا توجد طلبات حالياً</p>
-                            </div>
-                        ) : (
-                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50 dark:bg-gray-900">
-                                        <tr>
-                                            <th className="px-6 py-4 text-right text-sm font-semibold">اسم الطالب</th>
-                                            <th className="px-6 py-4 text-right text-sm font-semibold">المعدل</th>
-                                            <th className="px-6 py-4 text-right text-sm font-semibold">الحالة</th>
-                                            <th className="px-6 py-4 text-right text-sm font-semibold">الإجراءات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                        {requests.map((request) => (
-                                            <tr key={request._id} className="hover:bg-gray-50 dark:hover:bg-gray-900/50">
-                                                <td className="px-6 py-4 font-medium">{request.studentName}</td>
-                                                <td className="px-6 py-4">{request.gpa}</td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                        request.status === 'pending' 
-                                                            ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300'
-                                                            : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
-                                                    }`}>
-                                                        {request.status === 'pending' ? 'معلق' : 'مكتمل'}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex gap-2">
-                                                        {request.status === 'pending' && (
-                                                            <button
-                                                                onClick={() => { setSelectedRequest(request); setShowResponseModal(true); }}
-                                                                className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm"
-                                                            >
-                                                                ✅ رد
-                                                            </button>
-                                                        )}
-                                                        {request.status === 'completed' && (
-                                                            <button
-                                                                onClick={() => { 
-                                                                    setSelectedRequest(request); 
-                                                                    setResponseText(request.adminResponse || '');
-                                                                    setShowResponseModal(true); 
-                                                                }}
-                                                                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
-                                                            >
-                                                                ✏️ تعديل الرد
-                                                            </button>
-                                                        )}
-                                                        <button
-                                                            onClick={() => handleDeleteRequest(request._id)}
-                                                            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm"
-                                                        >
-                                                            🗑️
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
                     </div>
                 )}
 
@@ -597,17 +356,6 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                                     <option value="public">حكومية</option>
                                     <option value="private">خاصة</option>
                                 </select>
-                            </div>
-                            <div>
-                                <label className={labelClass}>رابط صورة الجامعة (اختياري)</label>
-                                <input
-                                    type="url"
-                                    value={uniImageUrl}
-                                    onChange={(e) => setUniImageUrl(e.target.value)}
-                                    placeholder="https://example.com/university-logo.png"
-                                    className={inputClass}
-                                />
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">أدخل رابط صورة شعار الجامعة</p>
                             </div>
                             <button
                                 type="submit"
@@ -874,17 +622,6 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                                     </div>
                                     
                                     <div>
-                                        <label className={labelClass}>نوع الدرجة العلمية</label>
-                                        <input
-                                            type="text"
-                                            value={degreeType}
-                                            onChange={(e) => setDegreeType(e.target.value)}
-                                            placeholder="مثال: بكالوريوس، ماجستير، دبلوم"
-                                            className={inputClass}
-                                        />
-                                    </div>
-                                    
-                                    <div>
                                         <label className={labelClass}>المجال الأكاديمي</label>
                                         <select
                                             value={academicField}
@@ -985,27 +722,6 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                                                 className="w-full h-12 p-1 border border-gray-300 dark:border-gray-600 rounded-lg"
                                             />
                                         </div>
-                                        <div>
-                                            <label className={labelClass}>نوع الجامعة</label>
-                                            <select
-                                                value={editingItem.type || 'public'}
-                                                onChange={(e) => setEditingItem({ ...editingItem, type: e.target.value })}
-                                                className={inputClass}
-                                            >
-                                                <option value="public">حكومية</option>
-                                                <option value="private">خاصة</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className={labelClass}>رابط صورة الجامعة (اختياري)</label>
-                                            <input
-                                                type="url"
-                                                value={editingItem.imageUrl || ''}
-                                                onChange={(e) => setEditingItem({ ...editingItem, imageUrl: e.target.value })}
-                                                placeholder="https://example.com/university-logo.png"
-                                                className={inputClass}
-                                            />
-                                        </div>
                                     </>
                                 )}
 
@@ -1040,49 +756,6 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                                                 onChange={(e) => setEditingItem({ ...editingItem, plan_url: e.target.value })}
                                                 className={inputClass}
                                                 placeholder="https://example.com/plan.pdf"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className={labelClass}>المجال الأكاديمي</label>
-                                            <select
-                                                value={editingItem.academic_field || 'engineering'}
-                                                onChange={(e) => setEditingItem({ ...editingItem, academic_field: e.target.value })}
-                                                className={inputClass}
-                                            >
-                                                <option value="engineering">هندسة</option>
-                                                <option value="medical">علوم طبية</option>
-                                                <option value="it">تكنولوجيا المعلومات</option>
-                                                <option value="business">أعمال واقتصاد</option>
-                                                <option value="arts">آداب وعلوم إنسانية</option>
-                                                <option value="science">علوم</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className={labelClass}>مدة الدراسة (سنوات)</label>
-                                            <input
-                                                type="number"
-                                                value={editingItem.study_info?.duration_years || ''}
-                                                onChange={(e) => setEditingItem({ 
-                                                    ...editingItem, 
-                                                    study_info: { ...editingItem.study_info, duration_years: e.target.value ? parseInt(e.target.value) : undefined }
-                                                })}
-                                                className={inputClass}
-                                                placeholder="مثال: 4"
-                                                min="1"
-                                                max="10"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className={labelClass}>نوع الدرجة العلمية</label>
-                                            <input
-                                                type="text"
-                                                value={editingItem.study_info?.degree_type || ''}
-                                                onChange={(e) => setEditingItem({ 
-                                                    ...editingItem, 
-                                                    study_info: { ...editingItem.study_info, degree_type: e.target.value }
-                                                })}
-                                                className={inputClass}
-                                                placeholder="مثال: بكالوريوس"
                                             />
                                         </div>
                                     </>
@@ -1131,59 +804,7 @@ const AdminDashboard = ({ onLogout }: AdminDashboardProps) => {
                         </div>
                     </div>
                 )}
-            </main>
-
-            {/* Consultation Response Modal */}
-            {showResponseModal && selectedRequest && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full p-6">
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                            الرد على طلب: {selectedRequest.studentName}
-                        </h2>
-
-                        <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                <strong>المعدل:</strong> {selectedRequest.gpa}
-                            </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                <strong>سنة التخرج:</strong> {selectedRequest.graduationYear}
-                            </p>
-                            {selectedRequest.message && (
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    <strong>الرسالة:</strong> {selectedRequest.message}
-                                </p>
-                            )}
-                        </div>
-
-                        <textarea
-                            value={responseText}
-                            onChange={(e) => setResponseText(e.target.value)}
-                            rows={6}
-                            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 mb-4"
-                            placeholder="اكتب ردك هنا..."
-                        />
-
-                        <div className="flex gap-3">
-                            <button
-                                onClick={handleRespondToRequest}
-                                className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition"
-                            >
-                                إرسال الرد
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setShowResponseModal(false);
-                                    setResponseText('');
-                                    setSelectedRequest(null);
-                                }}
-                                className="flex-1 py-3 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-lg transition"
-                            >
-                                إلغاء
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            </div>
         </div>
     );
 };
