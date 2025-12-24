@@ -13,6 +13,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'UP' });
+});
+
 app.use('/api', apiRoutes);
 
 const PORT = process.env.PORT || 5000;
